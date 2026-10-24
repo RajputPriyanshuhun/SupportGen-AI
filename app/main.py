@@ -4,12 +4,11 @@ import sys
 import os
 
 # Set root path correctly for imports
-ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from src.agent_swarm import SupportGenSwarm
-from tools.tools import OrderLookupTool
 
 # Page Configuration
 st.set_page_config(
@@ -106,13 +105,12 @@ def load_support_dataset():
 
 dataset = load_support_dataset()
 
-# Initialize Backend Swarm & Tools
+# Initialize Backend Swarm
 @st.cache_resource
 def get_swarm_instance():
     return SupportGenSwarm()
 
 swarm = get_swarm_instance()
-order_tool = OrderLookupTool()
 
 # Header Section
 st.markdown("""
