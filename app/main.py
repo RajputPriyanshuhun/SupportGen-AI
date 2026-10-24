@@ -187,4 +187,4 @@ if process_btn:
             <div class="card-title">📌 Agent Swarm Final Resolution</div>
             <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; white-space: pre-line;">{response}</p>
         </div>
-        """, unsafe_allow_html=True)s
+        """, unsafe_allow_html=True)
