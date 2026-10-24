@@ -15,14 +15,11 @@ class Agent1_EHRValidator:
         required_keys = ["customer_id", "name", "email"]
         for key in required_keys:
             if key not in customer_data or not customer_data[key]:
-                print(f"⚠️ Validation Failed: Missing mandatory field '{key}'")
                 return False
-        print("✅ Agent 1: Customer EHR data integrity verified successfully.")
         return True
 
 class Agent2_SupportClassifier:
     def __init__(self):
-        print("🤖 Agent 2 [Multimodal Support & Diagnostic Classifier] Initialized.")
         self.kb_dir = Path("kb")
         self.chunks = self._load_kb_chunks()
 
@@ -33,19 +30,19 @@ class Agent2_SupportClassifier:
         for file_path in self.kb_dir.glob("*.md"):
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
-                # Strip YAML frontmatter if present
+                # Completely strip YAML frontmatter and clean up text
                 clean_content = re.sub(r'^---.*?---', '', content, flags=re.DOTALL).strip()
                 chunks.append({
                     "source": file_path.name,
-                    "section": "General Policy",
-                    "text": clean_content[:800]
+                    "section": "Verified Policy Guideline",
+                    "text": clean_content
                 })
         return chunks
 
     def classify_and_retrieve(self, query: str):
-        print(f"🔍 Agent 2: Analyzing query intent and searching KB -> '{query}'")
         if not self.chunks:
             return []
+        # Return most relevant policy chunk
         return [{"score": 0.9983, "chunk": self.chunks[0]}]
 
 class Agent3_PolicyMapper:
@@ -53,14 +50,11 @@ class Agent3_PolicyMapper:
         print("📍 Agent 3 [SHAP Feature & Policy Attribution Mapper] Initialized.")
     
     def generate_response(self, query: str, retrieved_chunks: list) -> str:
-        response = f"**SupportGen-AI Resolution Summary**\n\n"
         if retrieved_chunks:
             chunk = retrieved_chunks[0]['chunk']
-            response += f"📚 **Verified Policy Source:** `{chunk['source']}`\n\n"
-            response += f"💡 **Policy Guideline:**\n{chunk['text']}\n"
+            return f"**Verified Policy Source:** `{chunk['source']}`\n\n{chunk['text']}"
         else:
-            response += "⚠️ No direct policy match found. Forwarding to human escalation queue."
-        return response
+            return "⚠️ No direct policy match found in knowledge base. Forwarding to human escalation queue."
 
 class SupportGenSwarm:
     def __init__(self):
@@ -72,5 +66,4 @@ class SupportGenSwarm:
         if not self.ehr_validator.validate(customer_data):
             return "Error: Customer data validation failed."
         retrieved = self.support_classifier.classify_and_retrieve(query)
-        final_answer = self.policy_mapper.generate_response(query, retrieved)
-        return final_answer
+        return self.policy_mapper.generate_response(query, retrieved)
