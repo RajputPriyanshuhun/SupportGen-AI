@@ -17,10 +17,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Soft Premium Light Theme CSS
+# Soft Premium Light Theme CSS with Logo alignment and Smooth Animations
 st.markdown("""
 <style>
-    /* Global App Background - Light Premium Soft Theme */
+    /* Global App Background */
     html, body, [data-testid="stAppViewContainer"], .stApp {
         background-color: #f8fafc !important;
         color: #0f172a !important;
@@ -41,39 +41,40 @@ st.markdown("""
         background-color: rgba(248, 250, 252, 0.9) !important;
     }
 
-    /* Premium Soft Header Banner */
+    /* Premium Soft Header Banner with Left-Aligned Logo */
     .brand-banner {
-        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-        border: 1px solid #cbd5e1;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 14px 20px;
+        padding: 16px 24px;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        justify-content: flex-start;
+        gap: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     }
     
-    .brand-logo {
+    .brand-logo-badge {
         background: linear-gradient(135deg, #2563eb, #4f46e5);
         color: #ffffff !important;
-        padding: 6px 14px;
-        border-radius: 8px;
+        padding: 8px 16px;
+        border-radius: 10px;
         font-weight: 800;
-        font-size: 14px;
-        letter-spacing: 1px;
+        font-size: 15px;
+        letter-spacing: 1.2px;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
     }
 
     .brand-title {
         color: #0f172a !important;
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 800;
         margin: 0;
         letter-spacing: 0.5px;
     }
 
-    /* Pre-Resolution Section Cards - Clean Light */
+    /* Pre-Resolution Section Cards */
     .pre-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
@@ -92,7 +93,7 @@ st.markdown("""
         padding-bottom: 6px;
     }
 
-    /* White Text Area Input Fix - Sharp Black Text */
+    /* Text Area Input */
     .stTextArea textarea, div[data-baseweb="textarea"] textarea {
         background-color: #ffffff !important;
         color: #0f172a !important;
@@ -102,14 +103,14 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Soft Premium Resolution Card */
+    /* Soft Premium Resolution Card with Elegant Cool Text Colors */
     .post-card {
         background-color: #ffffff;
-        border: 1.5px solid #3b82f6;
+        border: 1.5px solid #cbd5e1;
         border-radius: 12px;
         padding: 22px;
         margin-top: 18px;
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.08);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
     }
 
     .card-title-post {
@@ -119,6 +120,25 @@ st.markdown("""
         margin-bottom: 12px;
         border-bottom: 1px solid #e2e8f0;
         padding-bottom: 8px;
+    }
+
+    /* Premium Button with Smooth Hover Animation */
+    .stButton>button {
+        width: 100%;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #ffffff !important;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-weight: 700;
+        font-size: 15px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        transition: all 0.3s ease !important;
+    }
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
     }
 
     .metric-label {
@@ -143,33 +163,23 @@ st.markdown("""
     .b-shipped { background-color: #dbeafe; color: #1d4ed8 !important; }
     .b-cancelled { background-color: #fee2e2; color: #b91c1c !important; }
 
-    .stButton>button {
-        width: 100%;
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: #ffffff !important;
-        border: none;
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: 700;
+    /* Soft Cool Colors for Resolution Output Text & Metadata */
+    .yaml-key { color: #0369a1 !important; font-weight: 700; }
+    .yaml-val { color: #b45309 !important; font-weight: 600; }
+    .policy-content-box {
+        color: #334155 !important;
         font-size: 15px;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        line-height: 1.8;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
     }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-    }
-
-    /* Soft Color Formatting for Resolution Output */
-    .yaml-key { color: #0284c7 !important; font-weight: 800; }
-    .yaml-val { color: #d97706 !important; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
-# Helper function to remove raw YAML frontmatter and format policy headers softly
 def clean_and_format_policy(text: str) -> str:
-    # Strip raw YAML block
     cleaned = re.sub(r'^---[\s\S]*?---\s*', '', text, flags=re.MULTILINE).strip()
-    
-    # Format key-values softly if present
     def replace_kv(match):
         key = match.group(1)
         val = match.group(2)
@@ -204,11 +214,11 @@ def get_swarm():
 
 swarm = get_swarm()
 
-# Clean Executive Header
+# Executive Header with Left-Aligned Brand Logo Badge
 st.markdown("""
 <div class="brand-banner">
-    <span class="brand-logo">ZENTROMART</span>
-    <span class="brand-title">SupportGen-AI</span>
+    <div class="brand-logo-badge">⚡ ZENTROMART</div>
+    <span class="brand-title">SupportGen-AI Enterprise Hub</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -305,7 +315,7 @@ if run_swarm:
         st.markdown(f"""
         <div class="post-card">
             <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div style="color: #1e293b; font-size: 15px; line-height: 1.8; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div class="policy-content-box">
                 {formatted_response.replace(chr(10), '<br>')}
             </div>
         </div>
