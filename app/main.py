@@ -4,11 +4,11 @@ import sys
 import os
 
 # Set root path correctly for imports
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from src.agent_swarm import SupportSwarm
+from src.agent_swarm import SupportGenSwarm
 from tools.tools import OrderLookupTool
 
 # Page Configuration
@@ -106,10 +106,10 @@ def load_support_dataset():
 
 dataset = load_support_dataset()
 
-# Initialize Backend Swarm
+# Initialize Backend Swarm with Correct Class Name
 @st.cache_resource
 def get_swarm_instance():
-    return SupportSwarm()
+    return SupportGenSwarm()
 
 swarm = get_swarm_instance()
 order_tool = OrderLookupTool()
@@ -168,16 +168,24 @@ with col2:
         st.info("Lookup active order context from sidebar.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Execution Results
+# Execution Results using correct method signature
 if process_btn:
     st.markdown("---")
     st.subheader("⚡ Resolution Pipeline Execution")
+    
+    # Prepare customer data dictionary required by Agent1
+    customer_payload = {
+        "customer_id": str(selected_row['customer_id']) if selected_row is not None else "CUST-101",
+        "name": str(selected_row['name']) if selected_row is not None else "Priyanshu",
+        "email": str(selected_row['email']) if selected_row is not None else "priyanshu12tt@gmail.com"
+    }
+    
     with st.spinner("Swarm agents evaluating policy & order context..."):
-        response = swarm.process_query(selected_order_id, query)
+        response = swarm.process_support_ticket(customer_payload, query)
         st.success("Resolution Generated Successfully!")
         st.markdown(f"""
         <div class="saas-card">
             <div class="card-title">📌 Agent Swarm Final Resolution</div>
-            <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">{response}</p>
+            <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; white-space: pre-line;">{response}</p>
         </div>
         """, unsafe_allow_html=True)
