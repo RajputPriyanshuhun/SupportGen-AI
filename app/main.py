@@ -17,13 +17,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Enterprise CSS
+# Custom Enterprise Dark CSS (Force Dark Theme across all Streamlit containers)
 st.markdown("""
 <style>
-    .main {
-        background-color: #0b0f19;
-        color: #f8fafc;
+    /* Force main app background to dark */
+    html, body, [data-testid="stAppViewContainer"], .stApp {
+        background-color: #0b0f19 !important;
+        color: #f8fafc !important;
         font-family: 'Inter', sans-serif;
+    }
+    
+    [data-testid="stHeader"] {
+        background-color: rgba(11, 15, 25, 0.8) !important;
     }
     
     /* Fixed Clean Header - Only SupportGen-AI */
@@ -63,7 +68,7 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
-    /* Section Cards - Post-Resolution Section (Different Accent Colors) */
+    /* Section Cards - Post-Resolution Section (Distinct Accent Colors) */
     .post-card {
         background-color: #0f172a;
         border: 1px solid #334155;
@@ -114,14 +119,39 @@ st.markdown("""
     .stButton>button:hover {
         background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
     }
+
+    /* Syntax Highlighting for Key-Value Metadata in Output */
+    .yaml-key {
+        color: #38bdf8 !important;
+        font-weight: 700;
+    }
+    .yaml-val {
+        color: #f59e0b !important;
+        font-weight: 500;
+    }
+    .yaml-block {
+        margin: 8px 0;
+        padding: 10px;
+        background: #1e293b;
+        border-left: 3px solid #6366f1;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.8;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Clean Markdown Helper to strip frontmatter (--- YAML ---)
-def clean_markdown_output(text: str) -> str:
-    # Remove YAML frontmatter if present
-    cleaned = re.sub(r'^---[\s\S]*?---\s*', '', text, flags=re.MULTILINE)
-    return cleaned.strip()
+# Helper function to format YAML / metadata with distinct Key & Value colors and spacing
+def format_policy_metadata(text: str) -> str:
+    def replace_kv(match):
+        key = match.group(1)
+        val = match.group(2)
+        return f'<span class="yaml-key">{key}:</span> <span class="yaml-val">{val}</span>'
+
+    # Format key: value pattern
+    formatted = re.sub(r'([a-zA-Z0-9_]+):\s*([^\n<]+)', replace_kv, text)
+    return formatted
 
 @st.cache_data
 def load_all_datasets():
@@ -230,7 +260,7 @@ with col2:
         st.info("Please select an order from the left sidebar to load context.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Post-Resolution Swarm Output (Distinct Color Style)
+# Post-Resolution Swarm Output
 if run_swarm:
     st.markdown("---")
     st.subheader("⚡ Multi-Agent Swarm Resolution Pipeline Execution")
@@ -243,14 +273,14 @@ if run_swarm:
     
     with st.spinner("Executing Autonomous Swarm Agents..."):
         raw_response = swarm.process_support_ticket(cust_payload, query)
-        cleaned_response = clean_markdown_output(raw_response)
+        formatted_response = format_policy_metadata(raw_response)
         
         st.success("Resolution Generated Successfully!")
         st.markdown(f"""
         <div class="post-card">
             <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div style="color: #e2e8f0; font-size: 15px; line-height: 1.7; background: #020617; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                {cleaned_response.replace(chr(10), '<br>')}
+            <div style="color: #e2e8f0; font-size: 15px; line-height: 1.8; background: #020617; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+                {formatted_response.replace(chr(10), '<br>')}
             </div>
         </div>
         """, unsafe_allow_html=True)
