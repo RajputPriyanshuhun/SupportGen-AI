@@ -17,24 +17,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Ultra-Premium Dark Theme CSS for Entire Page (Main Body + Sidebar)
+# High-Contrast Executive Dark Theme CSS
 st.markdown("""
 <style>
-    /* Global Background Override */
+    /* Global App Background */
     html, body, [data-testid="stAppViewContainer"], .stApp {
-        background-color: #0a0e17 !important;
-        color: #f1f5f9 !important;
+        background-color: #0b0f19 !important;
+        color: #f8fafc !important;
         font-family: 'Inter', -apple-system, sans-serif;
     }
 
-    /* Force Sidebar to match dark theme */
+    /* Force Sidebar Contrast */
     [data-testid="stSidebar"], section[data-testid="stSidebar"] > div {
         background-color: #0f172a !important;
-        border-right: 1px solid #1e293b !important;
+        border-right: 1px solid #334155 !important;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #f1f5f9 !important;
     }
 
     [data-testid="stHeader"] {
-        background-color: rgba(10, 14, 23, 0.9) !important;
+        background-color: rgba(11, 15, 25, 0.9) !important;
     }
 
     /* Premium ZentroMart Branding Banner */
@@ -48,13 +52,13 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         gap: 12px;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
     }
     
     .brand-logo {
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        color: white;
-        padding: 6px 12px;
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: #ffffff !important;
+        padding: 6px 14px;
         border-radius: 8px;
         font-weight: 800;
         font-size: 14px;
@@ -62,86 +66,99 @@ st.markdown("""
     }
 
     .brand-title {
-        color: #f8fafc;
+        color: #ffffff !important;
         font-size: 26px;
-        font-weight: 700;
+        font-weight: 800;
         margin: 0;
         letter-spacing: 0.5px;
     }
 
-    /* Section Cards Styling */
+    /* Pre-Resolution Section Cards */
     .pre-card {
-        background-color: #0f172a;
-        border: 1px solid #1e293b;
+        background-color: #111827;
+        border: 1px solid #374151;
         border-radius: 12px;
         padding: 18px;
         margin-bottom: 16px;
     }
 
     .card-title-pre {
-        color: #38bdf8;
-        font-size: 15px;
-        font-weight: 700;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #1e293b;
-        padding-bottom: 6px;
-    }
-
-    .post-card {
-        background-color: #0f172a;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 20px;
-        margin-top: 18px;
-    }
-
-    .card-title-post {
-        color: #34d399;
+        color: #38bdf8 !important;
         font-size: 16px;
         font-weight: 700;
         margin-bottom: 12px;
-        border-bottom: 1px solid #334155;
+        border-bottom: 1px solid #374151;
         padding-bottom: 6px;
     }
 
+    /* High-Contrast Input Box Fix */
+    .stTextArea textarea, div[data-baseweb="textarea"] textarea {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #475569 !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+    }
+
+    /* Post-Resolution Card (Image 2 Color Upgrade) */
+    .post-card {
+        background-color: #131c2e;
+        border: 1px solid #2563eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 18px;
+        box-shadow: 0 6px 24px rgba(37, 99, 235, 0.25);
+    }
+
+    .card-title-post {
+        color: #34d399 !important;
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #1e3a8a;
+        padding-bottom: 8px;
+    }
+
     .metric-label {
-        color: #94a3b8;
+        color: #cbd5e1 !important;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .metric-val {
-        color: #f1f5f9;
-        font-size: 13px;
+        color: #ffffff !important;
+        font-weight: 700;
+        font-size: 14px;
     }
 
     .badge {
-        padding: 3px 10px;
+        padding: 4px 12px;
         border-radius: 9999px;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
     }
-    .b-delivered { background-color: #065f46; color: #34d399; }
-    .b-shipped { background-color: #1e3a8a; color: #60a5fa; }
-    .b-cancelled { background-color: #7f1d1d; color: #fca5a5; }
+    .b-delivered { background-color: #065f46; color: #34d399 !important; }
+    .b-shipped { background-color: #1e3a8a; color: #60a5fa !important; }
+    .b-cancelled { background-color: #7f1d1d; color: #fca5a5 !important; }
 
     .stButton>button {
         width: 100%;
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: white;
+        color: #ffffff !important;
         border: none;
         border-radius: 8px;
-        padding: 10px;
+        padding: 12px;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 15px;
     }
     .stButton>button:hover {
         background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     }
 
-    /* Key-Value Highlight CSS */
-    .yaml-key { color: #60a5fa !important; font-weight: 700; }
-    .yaml-val { color: #f59e0b !important; font-weight: 600; }
+    /* High-Contrast Key-Value Colors in Resolution Output */
+    .yaml-key { color: #38bdf8 !important; font-weight: 800; }
+    .yaml-val { color: #fbbf24 !important; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -281,7 +298,7 @@ if run_swarm:
         st.markdown(f"""
         <div class="post-card">
             <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div style="color: #e2e8f0; font-size: 14px; line-height: 1.8; background: #020617; padding: 18px; border-radius: 8px; border: 1px solid #1e293b;">
+            <div style="color: #ffffff; font-size: 15px; line-height: 1.8; background: #0b1324; padding: 20px; border-radius: 8px; border: 1px solid #1e3a8a;">
                 {formatted_response.replace(chr(10), '<br>')}
             </div>
         </div>
