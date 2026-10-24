@@ -106,7 +106,7 @@ def load_support_dataset():
 
 dataset = load_support_dataset()
 
-# Initialize Backend Swarm with Correct Class Name
+# Initialize Backend Swarm & Tools
 @st.cache_resource
 def get_swarm_instance():
     return SupportGenSwarm()
@@ -168,12 +168,11 @@ with col2:
         st.info("Lookup active order context from sidebar.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Execution Results using correct method signature
+# Execution Results
 if process_btn:
     st.markdown("---")
     st.subheader("⚡ Resolution Pipeline Execution")
     
-    # Prepare customer data dictionary required by Agent1
     customer_payload = {
         "customer_id": str(selected_row['customer_id']) if selected_row is not None else "CUST-101",
         "name": str(selected_row['name']) if selected_row is not None else "Priyanshu",
@@ -188,4 +187,4 @@ if process_btn:
             <div class="card-title">📌 Agent Swarm Final Resolution</div>
             <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; white-space: pre-line;">{response}</p>
         </div>
-        """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)s
