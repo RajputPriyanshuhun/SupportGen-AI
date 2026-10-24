@@ -3,14 +3,12 @@ import pandas as pd
 import sys
 import os
 
-# Set root path correctly for imports
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from src.agent_swarm import SupportGenSwarm
 
-# Page Configuration
 st.set_page_config(
     page_title="SupportGen-AI | Enterprise Portal",
     page_icon="⚡",
@@ -18,7 +16,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enterprise Custom CSS Styling & Animations
 st.markdown("""
 <style>
     .main {
@@ -26,47 +23,32 @@ st.markdown("""
         color: #f8fafc;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    
-    @keyframes pulseGlow {
-        0% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-        50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); }
-        100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-    }
-
     .animated-header {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #38bdf8;
         border-radius: 16px;
-        padding: 30px;
+        padding: 24px;
         margin-bottom: 24px;
-        animation: pulseGlow 4s infinite ease-in-out;
         text-align: center;
     }
-    
     .header-title {
         color: #38bdf8;
         font-size: 32px;
         font-weight: 800;
         margin: 0;
-        letter-spacing: -0.5px;
     }
-    
     .header-subtitle {
         color: #94a3b8;
-        font-size: 15px;
-        margin-top: 8px;
-        font-weight: 500;
+        font-size: 14px;
+        margin-top: 6px;
     }
-
     .saas-card {
         background-color: #1e293b;
         border: 1px solid #334155;
         border-radius: 12px;
-        padding: 24px;
+        padding: 20px;
         margin-bottom: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    
     .card-title {
         color: #f1f5f9;
         font-size: 16px;
@@ -75,35 +57,27 @@ st.markdown("""
         border-bottom: 1px solid #334155;
         padding-bottom: 8px;
     }
-    
     .status-badge {
         display: inline-block;
-        padding: 6px 14px;
+        padding: 4px 12px;
         border-radius: 9999px;
         font-size: 12px;
         font-weight: 600;
     }
     .badge-delivered { background-color: #065f46; color: #34d399; }
     .badge-intransit { background-color: #854d0e; color: #fbbf24; }
-    
     .stButton>button {
         width: 100%;
         background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
         color: white;
         border: none;
         border-radius: 8px;
-        padding: 12px 20px;
+        padding: 10px 16px;
         font-weight: 700;
-        transition: all 0.2s ease;
-    }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-        box-shadow: 0 0 15px rgba(2, 132, 199, 0.5);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Safe Dataset Loading with Flexible Column Mapping
 @st.cache_data
 def load_support_dataset():
     try:
@@ -115,6 +89,8 @@ def load_support_dataset():
             return pd.DataFrame()
             
         orders_df = pd.read_csv(orders_path)
+        orders_df['order_id'] = orders_df['order_id'].astype(str)
+        
         products_df = pd.read_csv(products_path) if os.path.exists(products_path) else pd.DataFrame()
         customers_df = pd.read_csv(customers_path) if os.path.exists(customers_path) else pd.DataFrame()
         
@@ -136,15 +112,14 @@ def get_swarm_instance():
 
 swarm = get_swarm_instance()
 
-# Animated Enterprise Header
+# Clean Header as requested
 st.markdown("""
 <div class="animated-header">
-    <div class="header-title">⚡ SupportGen-AI Enterprise Swarm Engine</div>
-    <div class="header-subtitle">Multi-Agent Autonomous Support Automation | IIT Guwahati GenAI Capstone</div>
+    <div class="header-title">SupportGen-AI</div>
+    <div class="header-subtitle">Autonomous Multi-Agent E-Commerce Support & Policy Resolution Engine</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar - Advanced Customer & Order Controls
 st.sidebar.header("🎯 Enterprise Control Panel")
 st.sidebar.markdown("---")
 
@@ -152,29 +127,30 @@ selected_row = None
 selected_order_id = "ORD-901"
 
 if not dataset.empty and 'order_id' in dataset.columns:
-    # Build clean dropdown options
     order_options = []
     for _, row in dataset.iterrows():
-        o_id = row.get('order_id', 'ORD')
-        p_name = row.get('product_name', row.get('product_id', 'Item'))
-        c_name = row.get('name', row.get('customer_id', 'Customer'))
+        o_id = str(row.get('order_id', 'ORD'))
+        p_name = str(row.get('product_name', row.get('product_id', 'Item')))
+        c_name = str(row.get('name', row.get('customer_id', 'Customer')))
         order_options.append(f"{o_id} — {p_name} ({c_name})")
     
     selected_option = st.sidebar.selectbox("Select Customer Order Context:", order_options)
-    selected_order_id = selected_option.split(" — ")[0]
-    selected_row = dataset[dataset['order_id'] == selected_order_id].iloc[0]
+    selected_order_id = selected_option.split(" — ")[0].strip()
     
-    st.sidebar.markdown("### 👤 Active Customer Profile")
-    st.sidebar.info(f"""
-    * **Name:** {selected_row.get('name', 'Valued Customer')}
-    * **Email:** {selected_row.get('email', 'customer@zentromart.com')}
-    * **Customer ID:** {selected_row.get('customer_id', 'CUST-101')}
-    """)
+    matched_rows = dataset[dataset['order_id'].astype(str) == str(selected_order_id)]
+    if not matched_rows.empty:
+        selected_row = matched_rows.iloc[0]
+    
+    if selected_row is not None:
+        st.sidebar.markdown("### 👤 Active Customer Profile")
+        st.sidebar.info(f"""
+        * **Name:** {selected_row.get('name', 'Valued Customer')}
+        * **Email:** {selected_row.get('email', 'customer@zentromart.com')}
+        * **Order ID:** {selected_row.get('order_id', 'ORD-901')}
+        """)
 else:
-    st.sidebar.warning("Dataset fallback active.")
     selected_order_id = st.sidebar.text_input("Order ID", "ORD-901")
 
-# Main Dashboard Grid
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
@@ -204,7 +180,6 @@ with col2:
         st.markdown('**Status:** <span class="status-badge badge-delivered">Delivered</span>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Execution Results Section
 if process_btn:
     st.markdown("---")
     st.subheader("⚡ Multi-Agent Swarm Pipeline Execution")
@@ -215,7 +190,7 @@ if process_btn:
         "email": str(selected_row.get('email', 'priyanshu12tt@gmail.com')) if selected_row is not None else "priyanshu12tt@gmail.com"
     }
     
-    with st.spinner("Autonomous Swarm Agents (EHR Validator -> Classifier -> Policy Mapper) processing..."):
+    with st.spinner("Autonomous Swarm Agents processing..."):
         response = swarm.process_support_ticket(customer_payload, query)
         st.success("Resolution Pipeline Executed Successfully!")
         st.markdown(f"""
