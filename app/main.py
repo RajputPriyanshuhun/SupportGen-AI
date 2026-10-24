@@ -17,34 +17,34 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# High-Contrast Executive Dark Theme CSS
+# Soft Premium Light Theme CSS
 st.markdown("""
 <style>
-    /* Global App Background */
+    /* Global App Background - Light Premium Soft Theme */
     html, body, [data-testid="stAppViewContainer"], .stApp {
-        background-color: #0b0f19 !important;
-        color: #f8fafc !important;
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
         font-family: 'Inter', -apple-system, sans-serif;
     }
 
-    /* Force Sidebar Contrast */
+    /* Soft Premium Sidebar */
     [data-testid="stSidebar"], section[data-testid="stSidebar"] > div {
-        background-color: #0f172a !important;
-        border-right: 1px solid #334155 !important;
+        background-color: #f1f5f9 !important;
+        border-right: 1px solid #e2e8f0 !important;
     }
 
     [data-testid="stSidebar"] * {
-        color: #f1f5f9 !important;
+        color: #1e293b !important;
     }
 
     [data-testid="stHeader"] {
-        background-color: rgba(11, 15, 25, 0.9) !important;
+        background-color: rgba(248, 250, 252, 0.9) !important;
     }
 
-    /* Premium ZentroMart Branding Banner */
+    /* Premium Soft Header Banner */
     .brand-banner {
-        background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
-        border: 1px solid #3b82f6;
+        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+        border: 1px solid #cbd5e1;
         border-radius: 12px;
         padding: 14px 20px;
         margin-bottom: 20px;
@@ -52,11 +52,11 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         gap: 12px;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     }
     
     .brand-logo {
-        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
         color: #ffffff !important;
         padding: 6px 14px;
         border-radius: 8px;
@@ -66,68 +66,69 @@ st.markdown("""
     }
 
     .brand-title {
-        color: #ffffff !important;
+        color: #0f172a !important;
         font-size: 26px;
         font-weight: 800;
         margin: 0;
         letter-spacing: 0.5px;
     }
 
-    /* Pre-Resolution Section Cards */
+    /* Pre-Resolution Section Cards - Clean Light */
     .pre-card {
-        background-color: #111827;
-        border: 1px solid #374151;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
         padding: 18px;
         margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
     .card-title-pre {
-        color: #38bdf8 !important;
+        color: #0284c7 !important;
         font-size: 16px;
         font-weight: 700;
         margin-bottom: 12px;
-        border-bottom: 1px solid #374151;
+        border-bottom: 1px solid #f1f5f9;
         padding-bottom: 6px;
     }
 
-    /* High-Contrast Input Box Fix */
+    /* White Text Area Input Fix - Sharp Black Text */
     .stTextArea textarea, div[data-baseweb="textarea"] textarea {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1px solid #475569 !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1.5px solid #cbd5e1 !important;
         border-radius: 8px !important;
         font-size: 14px !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
     }
 
-    /* Post-Resolution Card (Image 2 Color Upgrade) */
+    /* Soft Premium Resolution Card */
     .post-card {
-        background-color: #131c2e;
-        border: 1px solid #2563eb;
+        background-color: #ffffff;
+        border: 1.5px solid #3b82f6;
         border-radius: 12px;
-        padding: 20px;
+        padding: 22px;
         margin-top: 18px;
-        box-shadow: 0 6px 24px rgba(37, 99, 235, 0.25);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.08);
     }
 
     .card-title-post {
-        color: #34d399 !important;
+        color: #059669 !important;
         font-size: 18px;
         font-weight: 800;
         margin-bottom: 12px;
-        border-bottom: 1px solid #1e3a8a;
+        border-bottom: 1px solid #e2e8f0;
         padding-bottom: 8px;
     }
 
     .metric-label {
-        color: #cbd5e1 !important;
+        color: #64748b !important;
         font-weight: 600;
         font-size: 14px;
     }
 
     .metric-val {
-        color: #ffffff !important;
+        color: #0f172a !important;
         font-weight: 700;
         font-size: 14px;
     }
@@ -138,9 +139,9 @@ st.markdown("""
         font-size: 12px;
         font-weight: 700;
     }
-    .b-delivered { background-color: #065f46; color: #34d399 !important; }
-    .b-shipped { background-color: #1e3a8a; color: #60a5fa !important; }
-    .b-cancelled { background-color: #7f1d1d; color: #fca5a5 !important; }
+    .b-delivered { background-color: #d1fae5; color: #047857 !important; }
+    .b-shipped { background-color: #dbeafe; color: #1d4ed8 !important; }
+    .b-cancelled { background-color: #fee2e2; color: #b91c1c !important; }
 
     .stButton>button {
         width: 100%;
@@ -151,24 +152,30 @@ st.markdown("""
         padding: 12px;
         font-weight: 700;
         font-size: 15px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
     .stButton>button:hover {
         background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     }
 
-    /* High-Contrast Key-Value Colors in Resolution Output */
-    .yaml-key { color: #38bdf8 !important; font-weight: 800; }
-    .yaml-val { color: #fbbf24 !important; font-weight: 700; }
+    /* Soft Color Formatting for Resolution Output */
+    .yaml-key { color: #0284c7 !important; font-weight: 800; }
+    .yaml-val { color: #d97706 !important; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
-def format_policy_metadata(text: str) -> str:
+# Helper function to remove raw YAML frontmatter and format policy headers softly
+def clean_and_format_policy(text: str) -> str:
+    # Strip raw YAML block
+    cleaned = re.sub(r'^---[\s\S]*?---\s*', '', text, flags=re.MULTILINE).strip()
+    
+    # Format key-values softly if present
     def replace_kv(match):
         key = match.group(1)
         val = match.group(2)
         return f'<span class="yaml-key">{key}:</span> <span class="yaml-val">{val}</span>'
 
-    formatted = re.sub(r'([a-zA-Z0-9_]+):\s*([^\n<]+)', replace_kv, text)
+    formatted = re.sub(r'([a-zA-Z0-9_]+):\s*([^\n<]+)', replace_kv, cleaned)
     return formatted
 
 @st.cache_data
@@ -292,13 +299,13 @@ if run_swarm:
     
     with st.spinner("Executing Swarm Agents..."):
         raw_response = swarm.process_support_ticket(cust_payload, query)
-        formatted_response = format_policy_metadata(raw_response)
+        formatted_response = clean_and_format_policy(raw_response)
         
         st.success("Resolution Generated Successfully!")
         st.markdown(f"""
         <div class="post-card">
             <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div style="color: #ffffff; font-size: 15px; line-height: 1.8; background: #0b1324; padding: 20px; border-radius: 8px; border: 1px solid #1e3a8a;">
+            <div style="color: #1e293b; font-size: 15px; line-height: 1.8; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
                 {formatted_response.replace(chr(10), '<br>')}
             </div>
         </div>
