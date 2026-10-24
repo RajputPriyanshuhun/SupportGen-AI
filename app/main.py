@@ -89,23 +89,26 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Load Orders & Products Data for Dynamic Selection
+# Safe Dataset Loading with Fallback
 @st.cache_data
 def load_support_dataset():
     try:
-        orders_df = pd.read_csv('data/orders.csv')
-        products_df = pd.read_csv('data/products.csv')
-        customers_df = pd.read_csv('data/customers.csv')
+        orders_path = os.path.join(ROOT_DIR, 'data', 'orders.csv')
+        products_path = os.path.join(ROOT_DIR, 'data', 'products.csv')
+        customers_path = os.path.join(ROOT_DIR, 'data', 'customers.csv')
+        
+        orders_df = pd.read_csv(orders_path)
+        products_df = pd.read_csv(products_path)
+        customers_df = pd.read_csv(customers_path)
+        
         merged = orders_df.merge(products_df, on='product_id', how='left')
         merged = merged.merge(customers_df, on='customer_id', how='left')
         return merged
     except Exception as e:
-        st.error(f"Data loading error: {e}")
         return pd.DataFrame()
 
 dataset = load_support_dataset()
 
-# Initialize Backend Swarm
 @st.cache_resource
 def get_swarm_instance():
     return SupportGenSwarm()
@@ -123,9 +126,12 @@ st.markdown("""
 # Sidebar - Controls & Dynamic Selection
 st.sidebar.header("🎯 Context & Customer Controls")
 
-if not dataset.empty:
+selected_row = None
+selected_order_id = "ORD-901"
+
+if not dataset.empty and 'order_id' in dataset.columns:
     order_options = dataset.apply(
-        lambda row: f"{row['order_id']} - {row['product_name']} ({row['name']})", axis=1
+        lambda row: f"{row['order_id']} - {row.get('product_name', 'Item')} ({row.get('name', 'Customer')})", axis=1
     ).tolist()
     
     selected_option = st.sidebar.selectbox("Select Active Customer Order:", order_options)
@@ -134,12 +140,11 @@ if not dataset.empty:
     
     st.sidebar.markdown("---")
     st.sidebar.subheader("👤 Customer Profile")
-    st.sidebar.text(f"Name: {selected_row['name']}")
-    st.sidebar.text(f"Email: {selected_row['email']}")
-    st.sidebar.text(f"Order ID: {selected_row['order_id']}")
+    st.sidebar.text(f"Name: {selected_row.get('name', 'N/A')}")
+    st.sidebar.text(f"Email: {selected_row.get('email', 'N/A')}")
+    st.sidebar.text(f"Order ID: {selected_row.get('order_id', 'N/A')}")
 else:
     selected_order_id = st.sidebar.text_input("Order ID", "ORD-901")
-    selected_row = None
 
 # Main Dashboard Grid
 col1, col2 = st.columns([1.2, 1])
@@ -157,13 +162,14 @@ with col1:
 with col2:
     st.markdown('<div class="saas-card"><div class="card-title">📦 Active Order Context</div>', unsafe_allow_html=True)
     if selected_row is not None:
-        status_class = "badge-delivered" if str(selected_row['status']).lower() == 'delivered' else "badge-intransit"
-        st.markdown(f"**Item:** {selected_row['product_name']}")
-        st.markdown(f"**Price:** ${selected_row['price']}")
-        st.markdown(f"**Order Date:** {selected_row['order_date']}")
-        st.markdown(f'**Status:** <span class="status-badge {status_class}">{selected_row["status"]}</span>', unsafe_allow_html=True)
+        status = str(selected_row.get('status', 'Delivered'))
+        status_class = "badge-delivered" if status.lower() == 'delivered' else "badge-intransit"
+        st.markdown(f"**Item:** {selected_row.get('product_name', 'N/A')}")
+        st.markdown(f"**Price:** ${selected_row.get('price', '0.00')}")
+        st.markdown(f"**Order Date:** {selected_row.get('order_date', 'N/A')}")
+        st.markdown(f'**Status:** <span class="status-badge {status_class}">{status}</span>', unsafe_allow_html=True)
     else:
-        st.info("Lookup active order context from sidebar.")
+        st.info("Using default order context.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Execution Results
@@ -183,6 +189,8 @@ if process_btn:
         st.markdown(f"""
         <div class="saas-card">
             <div class="card-title">📌 Agent Swarm Final Resolution</div>
-            <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; white-space: pre-line;">{response}</p>
+            <div style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+                {response.replace(chr(10), '<br>')}
+            </div>
         </div>
         """, unsafe_allow_html=True)
