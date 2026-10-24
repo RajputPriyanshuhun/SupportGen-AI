@@ -4,12 +4,18 @@ import sys
 import os
 
 # Fix Python path for Streamlit Cloud deployment
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(current_dir, '..'))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
-from src.agent_swarm import SupportSwarm
-from tools.tools import OrderLookupTool
+try:
+    from src.agent_swarm import SupportSwarm
+    from tools.tools import OrderLookupTool
+except ImportError:
+    sys.path.insert(0, current_dir)
+    from src.agent_swarm import SupportSwarm
+    from tools.tools import OrderLookupTool
 
 # Page Configuration
 st.set_page_config(
@@ -181,4 +187,3 @@ if process_btn:
             <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">{response}</p>
         </div>
         """, unsafe_allow_html=True)
-    
