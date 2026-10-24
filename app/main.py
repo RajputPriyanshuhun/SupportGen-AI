@@ -3,19 +3,13 @@ import pandas as pd
 import sys
 import os
 
-# Fix Python path for Streamlit Cloud deployment
-current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.abspath(os.path.join(current_dir, '..'))
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
+# Set root path correctly for imports
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
-try:
-    from src.agent_swarm import SupportSwarm
-    from tools.tools import OrderLookupTool
-except ImportError:
-    sys.path.insert(0, current_dir)
-    from src.agent_swarm import SupportSwarm
-    from tools.tools import OrderLookupTool
+from src.agent_swarm import SupportSwarm
+from tools.tools import OrderLookupTool
 
 # Page Configuration
 st.set_page_config(
@@ -25,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enterprise Custom CSS
+# Enterprise Custom CSS Styling
 st.markdown("""
 <style>
     .main {
