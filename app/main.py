@@ -3,8 +3,10 @@ import pandas as pd
 import sys
 import os
 
-# Ensure backend modules can be imported
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Fix Python path for Streamlit Cloud deployment
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
 from src.agent_swarm import SupportSwarm
 from tools.tools import OrderLookupTool
@@ -20,14 +22,11 @@ st.set_page_config(
 # Enterprise Custom CSS
 st.markdown("""
 <style>
-    /* Main Background & Typography */
     .main {
         background-color: #0f172a;
         color: #f8fafc;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    
-    /* Header Container */
     .header-box {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -36,7 +35,6 @@ st.markdown("""
         margin-bottom: 24px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
-    
     .header-title {
         color: #38bdf8;
         font-size: 28px;
@@ -46,14 +44,11 @@ st.markdown("""
         align-items: center;
         gap: 12px;
     }
-    
     .header-subtitle {
         color: #94a3b8;
         font-size: 14px;
         margin-top: 6px;
     }
-
-    /* Cards */
     .saas-card {
         background-color: #1e293b;
         border: 1px solid #334155;
@@ -61,7 +56,6 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 16px;
     }
-    
     .card-title {
         color: #f1f5f9;
         font-size: 16px;
@@ -70,8 +64,6 @@ st.markdown("""
         border-bottom: 1px solid #334155;
         padding-bottom: 8px;
     }
-    
-    /* Badges */
     .status-badge {
         display: inline-block;
         padding: 4px 12px;
@@ -81,8 +73,6 @@ st.markdown("""
     }
     .badge-delivered { background-color: #065f46; color: #34d399; }
     .badge-intransit { background-color: #854d0e; color: #fbbf24; }
-    
-    /* Buttons */
     .stButton>button {
         width: 100%;
         background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
@@ -136,14 +126,11 @@ st.markdown("""
 st.sidebar.header("🎯 Context & Customer Controls")
 
 if not dataset.empty:
-    # Dynamic Order Selector
     order_options = dataset.apply(
         lambda row: f"{row['order_id']} - {row['product_name']} ({row['name']})", axis=1
     ).tolist()
     
     selected_option = st.sidebar.selectbox("Select Active Customer Order:", order_options)
-    
-    # Extract Order ID
     selected_order_id = selected_option.split(" - ")[0]
     selected_row = dataset[dataset['order_id'] == selected_order_id].iloc[0]
     
@@ -161,45 +148,37 @@ col1, col2 = st.columns([1.2, 1])
 
 with col1:
     st.markdown('<div class="saas-card"><div class="card-title">💬 Customer Issue Dispatch</div>', unsafe_allow_html=True)
-    
     query = st.text_area(
         "Support Query:",
         value="What is the return policy for damaged items and is my order eligible?",
         height=100
     )
-    
     process_btn = st.button("🚀 Execute Swarm Resolution")
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
     st.markdown('<div class="saas-card"><div class="card-title">📦 Active Order Context</div>', unsafe_allow_html=True)
-    
     if selected_row is not None:
-        status_class = "badge-delivered" if selected_row['status'].lower() == 'delivered' else "badge-intransit"
+        status_class = "badge-delivered" if str(selected_row['status']).lower() == 'delivered' else "badge-intransit"
         st.markdown(f"**Item:** {selected_row['product_name']}")
         st.markdown(f"**Price:** ${selected_row['price']}")
         st.markdown(f"**Order Date:** {selected_row['order_date']}")
         st.markdown(f'**Status:** <span class="status-badge {status_class}">{selected_row["status"]}</span>', unsafe_allow_html=True)
     else:
         st.info("Lookup active order context from sidebar.")
-        
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Execution Results
 if process_btn:
     st.markdown("---")
     st.subheader("⚡ Resolution Pipeline Execution")
-    
     with st.spinner("Swarm agents evaluating policy & order context..."):
-        # Process through backend swarm
         response = swarm.process_query(selected_order_id, query)
-        
         st.success("Resolution Generated Successfully!")
-        
-        # Display Clean Structured Result
         st.markdown(f"""
         <div class="saas-card">
             <div class="card-title">📌 Agent Swarm Final Resolution</div>
             <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">{response}</p>
         </div>
         """, unsafe_allow_html=True)
+    
