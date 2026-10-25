@@ -1,10 +1,13 @@
 import streamlit as st
 import pandas as pd
-import re
-import sys
 import os
-from fpdf import FPDF
 
+# Streamlit secrets se key uthakar environment mein set karne ke liye
+if hasattr(st, "secrets") and "GNANI_API_KEY" in st.secrets:
+    os.environ["GNANI_API_KEY"] = st.secrets["GNANI_API_KEY"]
+
+import sys
+from fpdf import FPDF
 # PDF Generation Class using FPDF
 class SupportPDF(FPDF):
     def header(self):
