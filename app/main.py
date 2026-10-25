@@ -187,6 +187,7 @@ def load_all_datasets():
         
         orders['order_id'] = orders['order_id'].astype(str)
         order_items['order_id'] = order_items['order_id'].astype(str)
+        support_logs['order_id'] = support_logs['order_id'].astype(str) if 'order_id' in support_logs.columns else pd.Series()
         
         return orders, customers, order_items, products, pincodes, support_logs, holidays
     except Exception:
@@ -216,6 +217,7 @@ selected_oid = None
 current_order = {}
 current_customer = {}
 current_items = pd.DataFrame()
+customer_logs = pd.DataFrame()
 
 if not orders_df.empty:
     merged_context = orders_df.merge(customers_df, on='customer_id', how='left')
@@ -244,6 +246,11 @@ if not orders_df.empty:
         current_customer = customers_df[customers_df['customer_id'] == current_order['customer_id']].iloc[0] if not customers_df.empty else {}
         current_items = order_items_df[order_items_df['order_id'] == selected_oid]
         
+        # Fetch support logs for this specific customer/order
+        if not support_logs_df.empty:
+            if 'customer_id' in support_logs_df.columns:
+                customer_logs = support_logs_df[support_logs_df['customer_id'].astype(str) == str(current_customer.get('customer_id', ''))]
+        
         pincode_val = str(current_order.get('delivery_pincode', ''))
         pin_info = pincodes_df[pincodes_df['pincode'].astype(str) == pincode_val]
         is_serviceable = pin_info['serviceable'].values[0] if not pin_info.empty else True
@@ -262,6 +269,23 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
+# Dynamically determine query based on support logs or order status
+default_query = "What is the return policy for damaged items and is my order eligible?"
+if not customer_logs.empty:
+    # Try to grab the issue/query from the customer's support logs
+    for col in ['query', 'issue', 'message', 'description', 'ticket_query']:
+        if col in customer_logs.columns and pd.notna(customer_logs.iloc[0][col]):
+            default_query = str(customer_logs.iloc[0][col])
+            break
+else:
+    status_val = str(current_order.get('status', '')).lower()
+    if status_val == 'delivered':
+        default_query = "My order was delivered but I want to check return and replacement eligibility."
+    elif status_val == 'cancelled':
+        default_query = "Why was my order cancelled and when will my refund be processed?"
+    elif status_val == 'shipped':
+        default_query = "Where is my shipment and what is the expected delivery date?"
+
 # Main Layout: Two Columns (Left: Customer Support Dispatch Query, Right: Order Items & Telemetry Details)
 col1, col2 = st.columns([1.2, 1])
 
@@ -270,12 +294,28 @@ with col1:
     <div class="clean-card">
         <span class="card-header-label">💬 Customer Support Dispatch</span>
     """, unsafe_allow_html=True)
+    
     query = st.text_area(
         "Enter Support Query / Issue:",
-        value="What is the return policy for damaged items and is my order eligible?",
+        value=default_query,
         height=110
     )
     run_swarm = st.button("🚀 Run Autonomous Swarm Resolution")
+    
+    # Display Past Support Tickets / Logs (`support_logs.csv`) right here inside the dispatch card
+    st.markdown("---")
+    st.markdown("##### 📜 Past Support Tickets & Interaction Logs")
+    if selected_oid and not customer_logs.empty:
+        for idx, log in customer_logs.iterrows():
+            log_id = log.get('ticket_id', log.get('support_id', f'TICKET-{idx+1}'))
+            log_query = log.get('query', log.get('issue', log.get('message', 'No details')))
+            log_status = log.get('status', 'Resolved')
+            st.markdown(f"- **{log_id}** [{log_status}]: _{log_query}_")
+    elif selected_oid:
+        st.caption("No prior support logs found for this customer in support_logs.csv.")
+    else:
+        st.caption("Select an order to view customer support logs.")
+        
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
