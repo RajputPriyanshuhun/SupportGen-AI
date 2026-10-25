@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enterprise SaaS Light Theme CSS
+# Ultra-Clean Enterprise SaaS Light Theme CSS
 st.markdown("""
 <style>
     html, body, [data-testid="stAppViewContainer"], .stApp {
@@ -71,16 +71,17 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
 
-    .pre-card {
+    /* Unified Content Cards */
+    .unified-card {
         background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 12px;
-        padding: 24px;
+        padding: 22px;
         margin-bottom: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     }
 
-    .card-title-inner {
+    .card-title-unified {
         color: #0284c7 !important;
         font-size: 17px;
         font-weight: 700;
@@ -198,7 +199,7 @@ def get_swarm():
 
 swarm = get_swarm()
 
-# Brand Header
+# Executive Header
 st.markdown("""
 <div class="brand-banner">
     <div class="brand-logo-badge">⚡ ZENTROMART</div>
@@ -206,7 +207,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Control Panel
+# Sidebar Control Panel with Quick Search
 st.sidebar.markdown("### ⚙️ Control Panel")
 st.sidebar.markdown("---")
 
@@ -218,8 +219,18 @@ current_items = pd.DataFrame()
 if not orders_df.empty:
     merged_context = orders_df.merge(customers_df, on='customer_id', how='left')
     
+    # Quick Search filter input in sidebar
+    search_query = st.sidebar.text_input("🔍 Quick Search (Order ID / Name):", "").strip()
+    
+    filtered_context = merged_context
+    if search_query:
+        filtered_context = merged_context[
+            merged_context['order_id'].str.contains(search_query, case=False, na=False) |
+            merged_context['name'].str.contains(search_query, case=False, na=False)
+        ]
+    
     order_options = ["-- Select Customer Order --"]
-    for _, row in merged_context.iterrows():
+    for _, row in filtered_context.iterrows():
         oid = str(row['order_id'])
         cname = str(row.get('name', 'Customer'))
         status = str(row.get('status', 'processing')).upper()
@@ -248,13 +259,13 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Main Display Cards with Headings and Full Depth Data inside
+# Main Display Cards with Unified Structure
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
     st.markdown("""
-    <div class="pre-card">
-        <div class="card-title-inner">💬 Customer Support Dispatch</div>
+    <div class="unified-card">
+        <div class="card-title-unified">💬 Customer Support Dispatch</div>
     """, unsafe_allow_html=True)
     query = st.text_area(
         "Enter Support Query / Issue:",
@@ -266,8 +277,8 @@ with col1:
 
 with col2:
     st.markdown("""
-    <div class="pre-card">
-        <div class="card-title-inner">📦 Order Items & Telemetry Details</div>
+    <div class="unified-card">
+        <div class="card-title-unified">📦 Order Items & Telemetry Details</div>
     """, unsafe_allow_html=True)
     if selected_oid and not current_items.empty:
         st.markdown(f'<span class="metric-label">Order ID:</span> <span class="metric-val">`{selected_oid}`</span>', unsafe_allow_html=True)
