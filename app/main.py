@@ -72,7 +72,7 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
 
-    /* Filled & Polished Section Cards */
+    /* Clean Content Cards */
     .pre-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
@@ -80,15 +80,6 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-
-    .card-title-pre {
-        color: #0284c7 !important;
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 14px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 8px;
     }
 
     /* Text Area Input */
@@ -253,11 +244,11 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Main Display Cards
+# Main Display Cards (Clean & Filled without empty header boxes)
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
-    st.markdown('<div class="pre-card"><div class="card-title-pre">💬 Customer Support Dispatch</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pre-card">', unsafe_allow_html=True)
     query = st.text_area(
         "Enter Support Query / Issue:",
         value="What is the return policy for damaged items and is my order eligible?",
@@ -267,7 +258,7 @@ with col1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="pre-card"><div class="card-title-pre">📦 Order Items & Telemetry Details</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pre-card">', unsafe_allow_html=True)
     if selected_oid and not current_items.empty:
         st.markdown(f'<span class="metric-label">Order ID:</span> <span class="metric-val">`{selected_oid}`</span>', unsafe_allow_html=True)
         st.markdown(f'<span class="metric-label">Payment / Type:</span> <span class="metric-val">{str(current_order.get("payment_method","")).upper()} | {str(current_order.get("delivery_type","")).capitalize()}</span>', unsafe_allow_html=True)
