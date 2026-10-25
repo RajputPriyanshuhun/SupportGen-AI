@@ -1,2 +1,7 @@
 numpy>=1.22.0
 fpdf
+streamlit
+pandas
+fpdf
+gnani-vachana
+python-dotenv
