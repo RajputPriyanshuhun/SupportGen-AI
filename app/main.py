@@ -24,30 +24,36 @@ def generate_support_pdf(order_id, customer_name, customer_email, query_text, re
     pdf.add_page()
     pdf.set_font("Arial", size=10)
     
+    # Safe text encoder to prevent UnicodeEncodeError for Rupee symbol
+    def safe_text(txt):
+        if not isinstance(txt, str):
+            txt = str(txt)
+        return txt.replace('₹', 'INR ').encode('latin-1', 'replace').decode('latin-1')
+
     pdf.set_font("Arial", "B", 11)
-    pdf.cell(0, 8, "1. Customer & Order Telemetry", 0, 1)
+    pdf.cell(0, 8, safe_text("1. Customer & Order Telemetry"), 0, 1)
     pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, f"Order ID: #{order_id}", 0, 1)
-    pdf.cell(0, 6, f"Customer Name: {customer_name}", 0, 1)
-    pdf.cell(0, 6, f"Customer Email: {customer_email}", 0, 1)
+    pdf.cell(0, 6, safe_text(f"Order ID: #{order_id}"), 0, 1)
+    pdf.cell(0, 6, safe_text(f"Customer Name: {customer_name}"), 0, 1)
+    pdf.cell(0, 6, safe_text(f"Customer Email: {customer_email}"), 0, 1)
     pdf.ln(4)
     
     pdf.set_font("Arial", "B", 11)
-    pdf.cell(0, 8, "2. Support Dispatch Query / Issue", 0, 1)
+    pdf.cell(0, 8, safe_text("2. Support Dispatch Query / Issue"), 0, 1)
     pdf.set_font("Arial", "", 10)
-    pdf.multi_cell(0, 6, query_text)
+    pdf.multi_cell(0, 6, safe_text(query_text))
     pdf.ln(4)
     
     pdf.set_font("Arial", "B", 11)
-    pdf.cell(0, 8, "3. Autonomous Swarm Resolution & Policy Attribution", 0, 1)
+    pdf.cell(0, 8, safe_text("3. Autonomous Swarm Resolution & Policy Attribution"), 0, 1)
     pdf.set_font("Arial", "", 10)
     
     clean_res = re.sub(r'#+\s*', '', resolution_text)
     clean_res = clean_res.replace('**', '')
     clean_res = clean_res.replace('`', '')
-    pdf.multi_cell(0, 6, clean_res)
+    pdf.multi_cell(0, 6, safe_text(clean_res))
     
-    return pdf.output(dest='S').encode('latin1', errors='ignore')
+    return pdf.output(dest='S')
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
@@ -398,31 +404,7 @@ with col2:
         st.info("Select an order from the left sidebar to load complete depth telemetry and item details.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Output Section for Autonomous Swarm Resolution
-if run_swarm:
-    st.markdown("---")
-    st.subheader("⚡ Multi-Agent Swarm Resolution Pipeline Execution")
-    
-    cust_payload = {
-        "customer_id": str(current_customer.get('customer_id', 'C100000')) if selected_oid else "None",
-        "name": str(current_customer.get('name', 'Guest User')) if selected_oid else "Guest User",
-        "email": str(current_customer.get('email', 'guest@example.com')) if selected_oid else "guest@example.com"
-    }
-    
-    with st.spinner("Executing Swarm Agents..."):
-        raw_response = swarm.process_support_ticket(cust_payload, query)
-        formatted_response = clean_and_format_policy(raw_response)
-        
-        st.success("Resolution Generated Successfully!")
-        st.markdown(f"""
-        <div class="post-card">
-            <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div class="policy-content-box">
-                {formatted_response.replace(chr(10), '<br>')}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        # Output Section for Autonomous Swarm Resolution with PDF Download
+# Output Section for Autonomous Swarm Resolution with PDF Download Button
 if run_swarm:
     st.markdown("---")
     st.subheader("⚡ Multi-Agent Swarm Resolution Pipeline Execution")
