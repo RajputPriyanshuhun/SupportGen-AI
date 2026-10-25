@@ -3,6 +3,51 @@ import pandas as pd
 import re
 import sys
 import os
+from fpdf import FPDF
+
+# PDF Generation Class using FPDF
+class SupportPDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 14)
+        self.cell(0, 10, 'ZENTROMART | SupportGen-AI Enterprise Report', 0, 1, 'C')
+        self.set_font('Arial', 'I', 9)
+        self.cell(0, 6, 'Automated Multi-Agent Swarm Resolution Audit Document', 0, 1, 'C')
+        self.ln(5)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Confidential - Internal Company Use Only | Page {self.page_no()}', 0, 0, 'C')
+
+def generate_support_pdf(order_id, customer_name, customer_email, query_text, resolution_text):
+    pdf = SupportPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=10)
+    
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(0, 8, "1. Customer & Order Telemetry", 0, 1)
+    pdf.set_font("Arial", "", 10)
+    pdf.cell(0, 6, f"Order ID: #{order_id}", 0, 1)
+    pdf.cell(0, 6, f"Customer Name: {customer_name}", 0, 1)
+    pdf.cell(0, 6, f"Customer Email: {customer_email}", 0, 1)
+    pdf.ln(4)
+    
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(0, 8, "2. Support Dispatch Query / Issue", 0, 1)
+    pdf.set_font("Arial", "", 10)
+    pdf.multi_cell(0, 6, query_text)
+    pdf.ln(4)
+    
+    pdf.set_font("Arial", "B", 11)
+    pdf.cell(0, 8, "3. Autonomous Swarm Resolution & Policy Attribution", 0, 1)
+    pdf.set_font("Arial", "", 10)
+    
+    clean_res = re.sub(r'#+\s*', '', resolution_text)
+    clean_res = clean_res.replace('**', '')
+    clean_res = clean_res.replace('`', '')
+    pdf.multi_cell(0, 6, clean_res)
+    
+    return pdf.output(dest='S').encode('latin1', errors='ignore')
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
@@ -377,3 +422,45 @@ if run_swarm:
             </div>
         </div>
         """, unsafe_allow_html=True)
+        # Output Section for Autonomous Swarm Resolution with PDF Download
+if run_swarm:
+    st.markdown("---")
+    st.subheader("⚡ Multi-Agent Swarm Resolution Pipeline Execution")
+    
+    cust_payload = {
+        "customer_id": str(current_customer.get('customer_id', 'C100000')) if selected_oid else "None",
+        "name": str(current_customer.get('name', 'Guest User')) if selected_oid else "Guest User",
+        "email": str(current_customer.get('email', 'guest@example.com')) if selected_oid else "guest@example.com"
+    }
+    
+    with st.spinner("Executing Swarm Agents..."):
+        raw_response = swarm.process_support_ticket(cust_payload, query)
+        formatted_response = clean_and_format_policy(raw_response)
+        
+        st.success("Resolution Generated Successfully!")
+        st.markdown(f"""
+        <div class="post-card">
+            <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
+            <div class="policy-content-box">
+                {formatted_response.replace(chr(10), '<br>')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # PDF Generation and Download Button
+        if selected_oid:
+            pdf_data = generate_support_pdf(
+                order_id=selected_oid,
+                customer_name=current_customer.get('name', 'N/A'),
+                customer_email=current_customer.get('email', 'N/A'),
+                query_text=query,
+                resolution_text=formatted_response
+            )
+            
+            st.markdown("---")
+            st.download_button(
+                label="📥 Download PDF",
+                data=pdf_data,
+                file_name=f"SupportGen_Report_{selected_oid}.pdf",
+                mime="application/pdf"
+            )
