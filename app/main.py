@@ -17,17 +17,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Soft Premium Light Theme CSS with Logo alignment and Smooth Animations
+# Ultra-Clean Enterprise SaaS Light Theme CSS
 st.markdown("""
 <style>
-    /* Global App Background */
     html, body, [data-testid="stAppViewContainer"], .stApp {
         background-color: #f8fafc !important;
         color: #0f172a !important;
         font-family: 'Inter', -apple-system, sans-serif;
     }
 
-    /* Soft Premium Sidebar */
     [data-testid="stSidebar"], section[data-testid="stSidebar"] > div {
         background-color: #f1f5f9 !important;
         border-right: 1px solid #e2e8f0 !important;
@@ -41,7 +39,7 @@ st.markdown("""
         background-color: rgba(248, 250, 252, 0.9) !important;
     }
 
-    /* Premium Soft Header Banner with Left-Aligned Logo */
+    /* Clean Header Banner */
     .brand-banner {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border: 1px solid #e2e8f0;
@@ -74,23 +72,23 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
 
-    /* Pre-Resolution Section Cards */
+    /* Filled & Polished Section Cards */
     .pre-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 18px;
+        padding: 20px;
         margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
 
     .card-title-pre {
         color: #0284c7 !important;
         font-size: 16px;
         font-weight: 700;
-        margin-bottom: 12px;
-        border-bottom: 1px solid #f1f5f9;
-        padding-bottom: 6px;
+        margin-bottom: 14px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 8px;
     }
 
     /* Text Area Input */
@@ -103,12 +101,12 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Soft Premium Resolution Card with Elegant Cool Text Colors */
+    /* Soft Premium Resolution Card */
     .post-card {
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
         border-radius: 12px;
-        padding: 22px;
+        padding: 24px;
         margin-top: 18px;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
     }
@@ -117,9 +115,9 @@ st.markdown("""
         color: #059669 !important;
         font-size: 18px;
         font-weight: 800;
-        margin-bottom: 12px;
-        border-bottom: 1px solid #e2e8f0;
-        padding-bottom: 8px;
+        margin-bottom: 14px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
     }
 
     /* Premium Button with Smooth Hover Animation */
@@ -163,11 +161,8 @@ st.markdown("""
     .b-shipped { background-color: #dbeafe; color: #1d4ed8 !important; }
     .b-cancelled { background-color: #fee2e2; color: #b91c1c !important; }
 
-    /* Soft Cool Colors for Resolution Output Text & Metadata */
-    .yaml-key { color: #0369a1 !important; font-weight: 700; }
-    .yaml-val { color: #b45309 !important; font-weight: 600; }
     .policy-content-box {
-        color: #334155 !important;
+        color: #1e293b !important;
         font-size: 15px;
         line-height: 1.8;
         background: #f8fafc;
@@ -180,13 +175,7 @@ st.markdown("""
 
 def clean_and_format_policy(text: str) -> str:
     cleaned = re.sub(r'^---[\s\S]*?---\s*', '', text, flags=re.MULTILINE).strip()
-    def replace_kv(match):
-        key = match.group(1)
-        val = match.group(2)
-        return f'<span class="yaml-key">{key}:</span> <span class="yaml-val">{val}</span>'
-
-    formatted = re.sub(r'([a-zA-Z0-9_]+):\s*([^\n<]+)', replace_kv, cleaned)
-    return formatted
+    return cleaned
 
 @st.cache_data
 def load_all_datasets():
@@ -214,7 +203,7 @@ def get_swarm():
 
 swarm = get_swarm()
 
-# Executive Header with Left-Aligned Brand Logo Badge
+# Executive Header with ZENTROMART Branding Badge
 st.markdown("""
 <div class="brand-banner">
     <div class="brand-logo-badge">⚡ ZENTROMART</div>
@@ -222,8 +211,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Control
-st.sidebar.markdown("### 🎛️ Control Panel")
+# Sidebar Control Panel
+st.sidebar.markdown("### ⚙️ Control Panel")
 st.sidebar.markdown("---")
 
 selected_oid = None
@@ -264,7 +253,7 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Main Display
+# Main Display Cards
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
@@ -293,7 +282,7 @@ with col2:
         for _, item in current_items.iterrows():
             st.markdown(f"- **{item.get('title')}** (Qty: {item.get('qty')} | ₹{item.get('unit_price_inr')})")
     else:
-        st.info("Select an order from the left sidebar to load context.")
+        st.info("Select an order from the left sidebar to load context and item telemetry.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Output Section
