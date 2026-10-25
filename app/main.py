@@ -142,7 +142,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar with Quick Search & Order Select
+# Sidebar Control Panel with Quick Search & Comprehensive Customer Profile
 st.sidebar.markdown("### ⚙️ Control Panel")
 st.sidebar.markdown("---")
 
@@ -154,7 +154,7 @@ current_items = pd.DataFrame()
 if not orders_df.empty:
     merged_context = orders_df.merge(customers_df, on='customer_id', how='left')
     
-    # Quick Search Bar Restored
+    # Quick Search Bar
     search_query = st.sidebar.text_input("🔍 Quick Search (Order ID / Name):", "").strip()
     
     filtered_context = merged_context
@@ -184,10 +184,14 @@ if not orders_df.empty:
         is_serviceable = pin_info['serviceable'].values[0] if not pin_info.empty else True
         cod_avail = pin_info['cod_available'].values[0] if not pin_info.empty else True
         
-        st.sidebar.markdown("#### 👤 Customer Profile")
+        # Comprehensive Customer Bio Data Profile
+        st.sidebar.markdown("#### 👤 Comprehensive Customer Profile")
         st.sidebar.info(f"""
+        * **Customer ID:** `{current_customer.get('customer_id', 'N/A')}`
         * **Name:** {current_customer.get('name', 'N/A')}
         * **Email:** {current_customer.get('email', 'N/A')}
+        * **Phone:** {current_customer.get('phone', 'N/A')}
+        * **Member Since:** {current_customer.get('created_at', 'N/A')}
         * **Location:** {pin_info['city'].values[0] if not pin_info.empty else 'N/A'}, {pin_info['state'].values[0] if not pin_info.empty else 'N/A'} (Pin: {pincode_val})
         * **Serviceable:** {'✅ Yes' if is_serviceable else '❌ No'} | **COD:** {'✅' if cod_avail else '❌'}
         """)
