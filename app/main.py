@@ -124,15 +124,16 @@ def load_all_datasets():
         products = pd.read_csv(os.path.join(data_dir, 'products.csv'))
         pincodes = pd.read_csv(os.path.join(data_dir, 'pincodes.csv'))
         support_logs = pd.read_csv(os.path.join(data_dir, 'support_logs.csv'))
+        holidays = pd.read_csv(os.path.join(data_dir, 'holidays.csv'))
         
         orders['order_id'] = orders['order_id'].astype(str)
         order_items['order_id'] = order_items['order_id'].astype(str)
         
-        return orders, customers, order_items, products, pincodes, support_logs
+        return orders, customers, order_items, products, pincodes, support_logs, holidays
     except Exception:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-orders_df, customers_df, order_items_df, products_df, pincodes_df, support_logs_df = load_all_datasets()
+orders_df, customers_df, order_items_df, products_df, pincodes_df, support_logs_df, holidays_df = load_all_datasets()
 
 # Header Display
 st.markdown("""
