@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Ultra-Clean Enterprise SaaS Light Theme CSS
+# Enterprise SaaS Light Theme CSS
 st.markdown("""
 <style>
     html, body, [data-testid="stAppViewContainer"], .stApp {
@@ -39,7 +39,6 @@ st.markdown("""
         background-color: rgba(248, 250, 252, 0.9) !important;
     }
 
-    /* Clean Header Banner */
     .brand-banner {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border: 1px solid #e2e8f0;
@@ -72,26 +71,24 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
 
-    /* Properly Filled Content Cards with Clear Titles Inside */
     .pre-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
-        padding: 20px;
+        padding: 24px;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
 
     .card-title-inner {
         color: #0284c7 !important;
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 700;
-        margin-bottom: 14px;
+        margin-bottom: 16px;
         border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 8px;
+        padding-bottom: 10px;
     }
 
-    /* Text Area Input */
     .stTextArea textarea, div[data-baseweb="textarea"] textarea {
         background-color: #ffffff !important;
         color: #0f172a !important;
@@ -101,7 +98,6 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Soft Premium Resolution Card */
     .post-card {
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
@@ -120,7 +116,6 @@ st.markdown("""
         padding-bottom: 10px;
     }
 
-    /* Premium Button with Smooth Hover Animation */
     .stButton>button {
         width: 100%;
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
@@ -203,7 +198,7 @@ def get_swarm():
 
 swarm = get_swarm()
 
-# Executive Header with ZENTROMART Branding Badge
+# Brand Header
 st.markdown("""
 <div class="brand-banner">
     <div class="brand-logo-badge">⚡ ZENTROMART</div>
@@ -253,12 +248,14 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Main Display Cards with Titles Inside the Boxes
+# Main Display Cards with Headings and Full Depth Data inside
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
-    st.markdown('<div class="pre-card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title-inner">💬 Customer Support Dispatch</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="pre-card">
+        <div class="card-title-inner">💬 Customer Support Dispatch</div>
+    """, unsafe_allow_html=True)
     query = st.text_area(
         "Enter Support Query / Issue:",
         value="What is the return policy for damaged items and is my order eligible?",
@@ -268,8 +265,10 @@ with col1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="pre-card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title-inner">📦 Order Items & Telemetry Details</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="pre-card">
+        <div class="card-title-inner">📦 Order Items & Telemetry Details</div>
+    """, unsafe_allow_html=True)
     if selected_oid and not current_items.empty:
         st.markdown(f'<span class="metric-label">Order ID:</span> <span class="metric-val">`{selected_oid}`</span>', unsafe_allow_html=True)
         st.markdown(f'<span class="metric-label">Payment / Type:</span> <span class="metric-val">{str(current_order.get("payment_method","")).upper()} | {str(current_order.get("delivery_type","")).capitalize()}</span>', unsafe_allow_html=True)
@@ -284,7 +283,7 @@ with col2:
         for _, item in current_items.iterrows():
             st.markdown(f"- **{item.get('title')}** (Qty: {item.get('qty')} | ₹{item.get('unit_price_inr')})")
     else:
-        st.info("Select an order from the left sidebar to load context and item telemetry.")
+        st.info("Select an order from the left sidebar to load complete depth telemetry and item details.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Output Section
