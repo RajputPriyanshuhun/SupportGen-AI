@@ -459,8 +459,8 @@ if run_swarm:
                 mime="application/pdf"
             )
 
-# Crash-proof stable voice / simulation assistant section
-with st.expander("🎙️ Try Voice Assistant (ZentroMart Live)", expanded=False):
+# Crash-proof stable voice assistant with Browser Speech Synthesis
+with st.expander("🎙️ Try Voice Assistant (ZentroMart Live Voice)", expanded=False):
     st.subheader("ZentroMart Voice Assistant")
     
     user_voice_text = st.text_input(
@@ -468,7 +468,7 @@ with st.expander("🎙️ Try Voice Assistant (ZentroMart Live)", expanded=False
         value="Where is my order delivery status and tracking details?"
     )
     
-    if st.button("Run Voice Assistant Pipeline"):
+    if st.button("Run Voice Assistant & Speak"):
         with st.spinner("Processing customer query through Swarm..."):
             cust_payload = {
                 "customer_id": str(current_customer.get('customer_id', 'C100000')) if selected_oid else "C100000",
@@ -480,4 +480,27 @@ with st.expander("🎙️ Try Voice Assistant (ZentroMart Live)", expanded=False
             final_reply = clean_and_format_policy(raw_res)
             
             st.success(f"**Transcribed Speech:** {user_voice_text}")
-            st.markdown(f"**Agent Audio/Text Response:**\n\n{final_reply}")
+            st.markdown(f"**Agent Response:**\n\n{final_reply}")
+            
+            # Clean text for speech synthesis (remove special markdown characters)
+            speech_text = final_reply.replace('#', '').replace('*', '').replace('\n', ' ').replace('`', '')
+            # Shorten text slightly for smooth speech playback
+            speech_text_safe = speech_text[:300].replace('"', "'")
+            
+            # JavaScript Web Speech API to make the browser speak out loud
+            speech_html = f"""
+            <script>
+                function speakText() {{
+                    if ('speechSynthesis' in window) {{
+                        window.speechSynthesis.cancel(); // Stop any ongoing speech
+                        var msg = new SpeechSynthesisUtterance("{speech_text_safe}");
+                        msg.rate = 1.0;
+                        msg.pitch = 1.0;
+                        msg.lang = 'en-IN';
+                        window.speechSynthesis.speak(msg);
+                    }}
+                }}
+                speakText();
+            </script>
+            """
+            st.components.v1.html(speech_html, height=0)
