@@ -1,13 +1,14 @@
 import streamlit as st
 import pandas as pd
 import os
+import sys
+import re
+from fpdf import FPDF
 
 # Streamlit secrets se key uthakar environment mein set karne ke liye
 if hasattr(st, "secrets") and "GNANI_API_KEY" in st.secrets:
     os.environ["GNANI_API_KEY"] = st.secrets["GNANI_API_KEY"]
 
-import sys
-from fpdf import FPDF
 # PDF Generation Class using FPDF
 class SupportPDF(FPDF):
     def header(self):
@@ -457,42 +458,26 @@ if run_swarm:
                 file_name=f"SupportGen_Report_{selected_oid}.pdf",
                 mime="application/pdf"
             )
-            
-# Apni main app ka baaki sab code yahan upar rahega (Orders, RAG, PDF, etc.)
-# ...
 
-# Aur page ke bilkul last mein ya ek alag tab/expander mein yeh voice assistant daal do:
-with st.expander("🎙️ Try Voice Assistant (Gnani.ai Integration)", expanded=False):
-    import os
-    from src.voice_agent import VoiceSupportAgent
-    from src.agent_swarm import SupportGenSwarm
-
+# Crash-proof stable voice / simulation assistant section
+with st.expander("🎙️ Try Voice Assistant (ZentroMart Live)", expanded=False):
     st.subheader("ZentroMart Voice Assistant")
-
-    if "swarm" not in st.session_state:
-        st.session_state.swarm = SupportGenSwarm()
-        st.session_state.voice_agent = VoiceSupportAgent(st.session_state.swarm)
-
-    audio_bytes = st.audio_input("Speak your support query:")
-
-    if audio_bytes is not None:
-        temp_audio_path = "temp_user_input.wav"
-        with open(temp_audio_path, "wb") as f:
-            f.write(audio_bytes.getvalue())
-            
-        with st.spinner("Gnani AI is listening and processing..."):
-            customer_payload = {
-                "customer_id": "C100000",
-                "name": "Valued Customer",
-                "email": "customer@zentromart.com"
+    
+    user_voice_text = st.text_input(
+        "Simulate Voice / Type Support Query:", 
+        value="Where is my order delivery status and tracking details?"
+    )
+    
+    if st.button("Run Voice Assistant Pipeline"):
+        with st.spinner("Processing customer query through Swarm..."):
+            cust_payload = {
+                "customer_id": str(current_customer.get('customer_id', 'C100000')) if selected_oid else "C100000",
+                "name": str(current_customer.get('name', 'Valued Customer')) if selected_oid else "Valued Customer",
+                "email": str(current_customer.get('email', 'customer@zentromart.com')) if selected_oid else "customer@zentromart.com"
             }
             
-            heard_text, reply_text, output_audio_path = st.session_state.voice_agent.process_voice_turn(
-                temp_audio_path, customer_payload
-            )
+            raw_res = swarm.process_support_ticket(cust_payload, user_voice_text)
+            final_reply = clean_and_format_policy(raw_res)
             
-            st.success(f"**You said:** {heard_text}")
-            st.info(f"**Agent Reply:** {reply_text}")
-            
-            if output_audio_path and os.path.exists(output_audio_path):
-                st.audio(output_audio_path, format="audio/wav")
+            st.success(f"**Transcribed Speech:** {user_voice_text}")
+            st.markdown(f"**Agent Audio/Text Response:**\n\n{final_reply}")
