@@ -207,7 +207,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Control Panel with Quick Search
+# Sidebar Control Panel (Cleaned up as requested)
 st.sidebar.markdown("### ⚙️ Control Panel")
 st.sidebar.markdown("---")
 
@@ -219,18 +219,8 @@ current_items = pd.DataFrame()
 if not orders_df.empty:
     merged_context = orders_df.merge(customers_df, on='customer_id', how='left')
     
-    # Quick Search filter input in sidebar
-    search_query = st.sidebar.text_input("🔍 Quick Search (Order ID / Name):", "").strip()
-    
-    filtered_context = merged_context
-    if search_query:
-        filtered_context = merged_context[
-            merged_context['order_id'].str.contains(search_query, case=False, na=False) |
-            merged_context['name'].str.contains(search_query, case=False, na=False)
-        ]
-    
     order_options = ["-- Select Customer Order --"]
-    for _, row in filtered_context.iterrows():
+    for _, row in merged_context.iterrows():
         oid = str(row['order_id'])
         cname = str(row.get('name', 'Customer'))
         status = str(row.get('status', 'processing')).upper()
