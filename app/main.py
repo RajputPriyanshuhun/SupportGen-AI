@@ -246,7 +246,6 @@ if not orders_df.empty:
         current_customer = customers_df[customers_df['customer_id'] == current_order['customer_id']].iloc[0] if not customers_df.empty else {}
         current_items = order_items_df[order_items_df['order_id'] == selected_oid]
         
-        # Fetch support logs for this specific customer/order
         if not support_logs_df.empty:
             if 'customer_id' in support_logs_df.columns:
                 customer_logs = support_logs_df[support_logs_df['customer_id'].astype(str) == str(current_customer.get('customer_id', ''))]
@@ -269,24 +268,28 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Dynamically determine query based on support logs or order status
-default_query = "What is the return policy for damaged items and is my order eligible?"
+# Dynamic query generation based on order status and context
+default_query = ""
 if not customer_logs.empty:
-    # Try to grab the issue/query from the customer's support logs
     for col in ['query', 'issue', 'message', 'description', 'ticket_query']:
         if col in customer_logs.columns and pd.notna(customer_logs.iloc[0][col]):
-            default_query = str(customer_logs.iloc[0][col])
-            break
-else:
+            val = str(customer_logs.iloc[0][col]).strip()
+            if val and val.lower() not in ['nan', 'no details', 'none']:
+                default_query = val
+                break
+
+if not default_query:
     status_val = str(current_order.get('status', '')).lower()
     if status_val == 'delivered':
-        default_query = "My order was delivered but I want to check return and replacement eligibility."
+        default_query = "Customer is inquiring about return/replacement policy eligibility for delivered items."
     elif status_val == 'cancelled':
-        default_query = "Why was my order cancelled and when will my refund be processed?"
+        default_query = "Customer is asking about cancellation reason and refund processing status."
     elif status_val == 'shipped':
-        default_query = "Where is my shipment and what is the expected delivery date?"
+        default_query = "Customer is asking for shipment tracking status and estimated delivery timeline."
+    else:
+        default_query = "Customer needs assistance regarding order fulfillment and support."
 
-# Main Layout: Two Columns (Left: Customer Support Dispatch Query, Right: Order Items & Telemetry Details)
+# Main Layout: Two Columns
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
@@ -302,17 +305,16 @@ with col1:
     )
     run_swarm = st.button("🚀 Run Autonomous Swarm Resolution")
     
-    # Display Past Support Tickets / Logs (`support_logs.csv`) right here inside the dispatch card
     st.markdown("---")
     st.markdown("##### 📜 Past Support Tickets & Interaction Logs")
     if selected_oid and not customer_logs.empty:
         for idx, log in customer_logs.iterrows():
             log_id = log.get('ticket_id', log.get('support_id', f'TICKET-{idx+1}'))
-            log_query = log.get('query', log.get('issue', log.get('message', 'No details')))
+            log_query = log.get('query', log.get('issue', log.get('message', log.get('description', 'No details'))))
             log_status = log.get('status', 'Resolved')
             st.markdown(f"- **{log_id}** [{log_status}]: _{log_query}_")
     elif selected_oid:
-        st.caption("No prior support logs found for this customer in support_logs.csv.")
+        st.caption("No prior support logs found for this customer.")
     else:
         st.caption("Select an order to view customer support logs.")
         
