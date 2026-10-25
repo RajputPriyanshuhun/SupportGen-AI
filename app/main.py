@@ -249,6 +249,8 @@ if not orders_df.empty:
         if not support_logs_df.empty:
             if 'customer_id' in support_logs_df.columns:
                 customer_logs = support_logs_df[support_logs_df['customer_id'].astype(str) == str(current_customer.get('customer_id', ''))]
+            elif 'order_id' in support_logs_df.columns:
+                customer_logs = support_logs_df[support_logs_df['order_id'].astype(str) == str(selected_oid)]
         
         pincode_val = str(current_order.get('delivery_pincode', ''))
         pin_info = pincodes_df[pincodes_df['pincode'].astype(str) == pincode_val]
@@ -263,31 +265,38 @@ if not orders_df.empty:
         * **Phone:** {current_customer.get('phone', 'N/A')}
         * **Member Since:** {current_customer.get('created_at', 'N/A')}
         * **Location:** {pin_info['city'].values[0] if not pin_info.empty else 'N/A'}, {pin_info['state'].values[0] if not pin_info.empty else 'N/A'} (Pin: {pincode_val})
-        * **Serviceable:** {'✅ Yes' if is_serviceable else '❌ No'} | **COD:** {'✅' if cod_avail else '❌'}
+        * **Serviceable Area:** {'✅ Yes' if is_serviceable else '❌ No'} 
+        * **COD Available in Pincode:** {'✅ Yes' if cod_avail else '❌ No'}
         """)
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Dynamic query generation based on order status and context
+# Highly dynamic query generation based on exact order & support logs
 default_query = ""
 if not customer_logs.empty:
-    for col in ['query', 'issue', 'message', 'description', 'ticket_query']:
-        if col in customer_logs.columns and pd.notna(customer_logs.iloc[0][col]):
-            val = str(customer_logs.iloc[0][col]).strip()
-            if val and val.lower() not in ['nan', 'no details', 'none']:
-                default_query = val
-                break
+    for _, log_row in customer_logs.iterrows():
+        for col in ['query', 'issue', 'message', 'description', 'ticket_query']:
+            if col in customer_logs.columns and pd.notna(log_row[col]):
+                val = str(log_row[col]).strip()
+                if val and val.lower() not in ['nan', 'no details', 'none', '']:
+                    default_query = val
+                    break
+        if default_query:
+            break
 
 if not default_query:
     status_val = str(current_order.get('status', '')).lower()
+    pay_method = str(current_order.get('payment_method', 'online')).upper()
+    total_amt = current_order.get('total_inr', 0)
+    
     if status_val == 'delivered':
-        default_query = "Customer is inquiring about return/replacement policy eligibility for delivered items."
+        default_query = f"Customer received order #{selected_oid} (Paid via {pay_method}, ₹{total_amt}) and is requesting information on replacement or return window eligibility."
     elif status_val == 'cancelled':
-        default_query = "Customer is asking about cancellation reason and refund processing status."
+        default_query = f"Order #{selected_oid} was cancelled. Customer is asking for the exact cancellation reason and refund status for ₹{total_amt}."
     elif status_val == 'shipped':
-        default_query = "Customer is asking for shipment tracking status and estimated delivery timeline."
+        default_query = f"Customer is inquiring about live tracking and courier dispatch status for shipped order #{selected_oid}."
     else:
-        default_query = "Customer needs assistance regarding order fulfillment and support."
+        default_query = f"Customer support inquiry regarding order #{selected_oid} fulfillment and SLA status."
 
 # Main Layout: Two Columns
 col1, col2 = st.columns([1.2, 1])
@@ -310,13 +319,13 @@ with col1:
     if selected_oid and not customer_logs.empty:
         for idx, log in customer_logs.iterrows():
             log_id = log.get('ticket_id', log.get('support_id', f'TICKET-{idx+1}'))
-            log_query = log.get('query', log.get('issue', log.get('message', log.get('description', 'No details'))))
+            log_query = log.get('query', log.get('issue', log.get('message', log.get('description', 'Support query recorded'))))
             log_status = log.get('status', 'Resolved')
             st.markdown(f"- **{log_id}** [{log_status}]: _{log_query}_")
     elif selected_oid:
-        st.caption("No prior support logs found for this customer.")
+        st.caption("No prior support logs found for this customer ID.")
     else:
-        st.caption("Select an order to view customer support logs.")
+        st.caption("Select an order from sidebar to view customer support logs.")
         
     st.markdown('</div>', unsafe_allow_html=True)
 
