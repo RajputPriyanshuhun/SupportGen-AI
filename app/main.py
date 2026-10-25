@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Ultra-Clean Enterprise SaaS Light Theme CSS
+# Enterprise SaaS Light Theme CSS
 st.markdown("""
 <style>
     html, body, [data-testid="stAppViewContainer"], .stApp {
@@ -71,68 +71,23 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
 
-    /* Unified Content Cards */
-    .unified-card {
+    .clean-card {
         background-color: #ffffff;
         border: 1px solid #cbd5e1;
         border-radius: 12px;
-        padding: 22px;
+        padding: 24px;
         margin-bottom: 16px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     }
 
-    .card-title-unified {
+    .card-header-label {
         color: #0284c7 !important;
-        font-size: 17px;
-        font-weight: 700;
-        margin-bottom: 16px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 10px;
-    }
-
-    .stTextArea textarea, div[data-baseweb="textarea"] textarea {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1.5px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-    }
-
-    .post-card {
-        background-color: #ffffff;
-        border: 1.5px solid #cbd5e1;
-        border-radius: 12px;
-        padding: 24px;
-        margin-top: 18px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
-    }
-
-    .card-title-post {
-        color: #059669 !important;
         font-size: 18px;
         font-weight: 800;
-        margin-bottom: 14px;
+        margin-bottom: 16px;
         border-bottom: 2px solid #e2e8f0;
         padding-bottom: 10px;
-    }
-
-    .stButton>button {
-        width: 100%;
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: #ffffff !important;
-        border: none;
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: 700;
-        font-size: 15px;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        transition: all 0.3s ease !important;
-    }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        display: block;
     }
 
     .metric-label {
@@ -156,22 +111,8 @@ st.markdown("""
     .b-delivered { background-color: #d1fae5; color: #047857 !important; }
     .b-shipped { background-color: #dbeafe; color: #1d4ed8 !important; }
     .b-cancelled { background-color: #fee2e2; color: #b91c1c !important; }
-
-    .policy-content-box {
-        color: #1e293b !important;
-        font-size: 15px;
-        line-height: 1.8;
-        background: #f8fafc;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
 </style>
 """, unsafe_allow_html=True)
-
-def clean_and_format_policy(text: str) -> str:
-    cleaned = re.sub(r'^---[\s\S]*?---\s*', '', text, flags=re.MULTILINE).strip()
-    return cleaned
 
 @st.cache_data
 def load_all_datasets():
@@ -193,13 +134,7 @@ def load_all_datasets():
 
 orders_df, customers_df, order_items_df, products_df, pincodes_df, support_logs_df = load_all_datasets()
 
-@st.cache_resource
-def get_swarm():
-    return SupportGenSwarm()
-
-swarm = get_swarm()
-
-# Executive Header
+# Header Display
 st.markdown("""
 <div class="brand-banner">
     <div class="brand-logo-badge">⚡ ZENTROMART</div>
@@ -207,7 +142,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Control Panel (Cleaned up as requested)
+# Sidebar with Quick Search & Order Select
 st.sidebar.markdown("### ⚙️ Control Panel")
 st.sidebar.markdown("---")
 
@@ -219,8 +154,18 @@ current_items = pd.DataFrame()
 if not orders_df.empty:
     merged_context = orders_df.merge(customers_df, on='customer_id', how='left')
     
+    # Quick Search Bar Restored
+    search_query = st.sidebar.text_input("🔍 Quick Search (Order ID / Name):", "").strip()
+    
+    filtered_context = merged_context
+    if search_query:
+        filtered_context = merged_context[
+            merged_context['order_id'].str.contains(search_query, case=False, na=False) |
+            merged_context['name'].str.contains(search_query, case=False, na=False)
+        ]
+    
     order_options = ["-- Select Customer Order --"]
-    for _, row in merged_context.iterrows():
+    for _, row in filtered_context.iterrows():
         oid = str(row['order_id'])
         cname = str(row.get('name', 'Customer'))
         status = str(row.get('status', 'processing')).upper()
@@ -249,65 +194,28 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Main Display Cards with Unified Structure
-col1, col2 = st.columns([1.2, 1])
+# Main Display: Prominent Order Items & Telemetry Details box
+st.markdown("""
+<div class="clean-card">
+    <span class="card-header-label">📦 Order Items & Telemetry Details</span>
+""", unsafe_allow_html=True)
 
-with col1:
-    st.markdown("""
-    <div class="unified-card">
-        <div class="card-title-unified">💬 Customer Support Dispatch</div>
-    """, unsafe_allow_html=True)
-    query = st.text_area(
-        "Enter Support Query / Issue:",
-        value="What is the return policy for damaged items and is my order eligible?",
-        height=110
-    )
-    run_swarm = st.button("🚀 Run Autonomous Swarm Resolution")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-    <div class="unified-card">
-        <div class="card-title-unified">📦 Order Items & Telemetry Details</div>
-    """, unsafe_allow_html=True)
-    if selected_oid and not current_items.empty:
+if selected_oid and not current_items.empty:
+    col_a, col_b = st.columns(2)
+    with col_a:
         st.markdown(f'<span class="metric-label">Order ID:</span> <span class="metric-val">`{selected_oid}`</span>', unsafe_allow_html=True)
         st.markdown(f'<span class="metric-label">Payment / Type:</span> <span class="metric-val">{str(current_order.get("payment_method","")).upper()} | {str(current_order.get("delivery_type","")).capitalize()}</span>', unsafe_allow_html=True)
+    with col_b:
         st.markdown(f'<span class="metric-label">Total Amount:</span> <span class="metric-val">₹{current_order.get("total_inr", 0)}</span>', unsafe_allow_html=True)
-        
         status_str = str(current_order.get("status", "shipped"))
         b_class = "b-delivered" if status_str=='delivered' else ("b-shipped" if status_str=='shipped' else "b-cancelled")
         st.markdown(f'<span class="metric-label">Status:</span> <span class="badge {b_class}">{status_str.upper()}</span>', unsafe_allow_html=True)
-        
-        st.markdown("---")
-        st.markdown("**Ordered SKUs / Items:**")
-        for _, item in current_items.iterrows():
-            st.markdown(f"- **{item.get('title')}** (Qty: {item.get('qty')} | ₹{item.get('unit_price_inr')})")
-    else:
-        st.info("Select an order from the left sidebar to load complete depth telemetry and item details.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Output Section
-if run_swarm:
+    
     st.markdown("---")
-    st.subheader("⚡ Multi-Agent Swarm Resolution Pipeline Execution")
-    
-    cust_payload = {
-        "customer_id": str(current_customer.get('customer_id', 'C100000')) if selected_oid else "None",
-        "name": str(current_customer.get('name', 'Guest User')) if selected_oid else "Guest User",
-        "email": str(current_customer.get('email', 'guest@example.com')) if selected_oid else "guest@example.com"
-    }
-    
-    with st.spinner("Executing Swarm Agents..."):
-        raw_response = swarm.process_support_ticket(cust_payload, query)
-        formatted_response = clean_and_format_policy(raw_response)
-        
-        st.success("Resolution Generated Successfully!")
-        st.markdown(f"""
-        <div class="post-card">
-            <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div class="policy-content-box">
-                {formatted_response.replace(chr(10), '<br>')}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("**Ordered SKUs / Items:**")
+    for _, item in current_items.iterrows():
+        st.markdown(f"- **{item.get('title')}** (Qty: {item.get('qty')} | ₹{item.get('unit_price_inr')})")
+else:
+    st.info("Select an order from the left sidebar to load complete depth telemetry and item details.")
+
+st.markdown('</div>', unsafe_allow_html=True)
