@@ -72,7 +72,7 @@ st.markdown("""
         letter-spacing: 0.5px;
     }
 
-    /* Clean Content Cards */
+    /* Filled Content Cards with Clear Titles Inside */
     .pre-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
@@ -80,6 +80,15 @@ st.markdown("""
         padding: 20px;
         margin-bottom: 16px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-title-inner {
+        color: #0284c7 !important;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 14px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 8px;
     }
 
     /* Text Area Input */
@@ -202,7 +211,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Control Panel
+# Sidebar Control Panel (Order Lookup Selectbox for Support Agents)
 st.sidebar.markdown("### ⚙️ Control Panel")
 st.sidebar.markdown("---")
 
@@ -244,59 +253,15 @@ if not orders_df.empty:
     else:
         st.sidebar.warning("No Order Selected. Select an order above.")
 
-# Main Display Cards (Clean & Filled without empty header boxes)
+# Main Display Cards with Titles Inside Boxes
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
     st.markdown('<div class="pre-card">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title-inner">💬 Customer Support Dispatch</div>', unsafe_allow_html=True)
     query = st.text_area(
         "Enter Support Query / Issue:",
         value="What is the return policy for damaged items and is my order eligible?",
         height=110
     )
-    run_swarm = st.button("🚀 Run Autonomous Swarm Resolution")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<div class="pre-card">', unsafe_allow_html=True)
-    if selected_oid and not current_items.empty:
-        st.markdown(f'<span class="metric-label">Order ID:</span> <span class="metric-val">`{selected_oid}`</span>', unsafe_allow_html=True)
-        st.markdown(f'<span class="metric-label">Payment / Type:</span> <span class="metric-val">{str(current_order.get("payment_method","")).upper()} | {str(current_order.get("delivery_type","")).capitalize()}</span>', unsafe_allow_html=True)
-        st.markdown(f'<span class="metric-label">Total Amount:</span> <span class="metric-val">₹{current_order.get("total_inr", 0)}</span>', unsafe_allow_html=True)
-        
-        status_str = str(current_order.get("status", "shipped"))
-        b_class = "b-delivered" if status_str=='delivered' else ("b-shipped" if status_str=='shipped' else "b-cancelled")
-        st.markdown(f'<span class="metric-label">Status:</span> <span class="badge {b_class}">{status_str.upper()}</span>', unsafe_allow_html=True)
-        
-        st.markdown("---")
-        st.markdown("**Ordered SKUs / Items:**")
-        for _, item in current_items.iterrows():
-            st.markdown(f"- **{item.get('title')}** (Qty: {item.get('qty')} | ₹{item.get('unit_price_inr')})")
-    else:
-        st.info("Select an order from the left sidebar to load context and item telemetry.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Output Section
-if run_swarm:
-    st.markdown("---")
-    st.subheader("⚡ Multi-Agent Swarm Resolution Pipeline Execution")
-    
-    cust_payload = {
-        "customer_id": str(current_customer.get('customer_id', 'C100000')) if selected_oid else "None",
-        "name": str(current_customer.get('name', 'Guest User')) if selected_oid else "Guest User",
-        "email": str(current_customer.get('email', 'guest@example.com')) if selected_oid else "guest@example.com"
-    }
-    
-    with st.spinner("Executing Swarm Agents..."):
-        raw_response = swarm.process_support_ticket(cust_payload, query)
-        formatted_response = clean_and_format_policy(raw_response)
-        
-        st.success("Resolution Generated Successfully!")
-        st.markdown(f"""
-        <div class="post-card">
-            <div class="card-title-post">📌 Final Agent Swarm Resolution & Policy Attribution</div>
-            <div class="policy-content-box">
-                {formatted_response.replace(chr(10), '<br>')}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    run_swarm =
