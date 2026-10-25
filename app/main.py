@@ -22,14 +22,17 @@ class SupportPDF(FPDF):
 def generate_support_pdf(order_id, customer_name, customer_email, query_text, resolution_text):
     pdf = SupportPDF()
     pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=10)
     
-    # Safe text encoder to prevent UnicodeEncodeError for Rupee symbol
+    # Safe text encoder to prevent UnicodeEncodeError and clean markdown symbols
     def safe_text(txt):
         if not isinstance(txt, str):
             txt = str(txt)
-        return txt.replace('₹', 'INR ').encode('latin-1', 'replace').decode('latin-1')
+        txt = txt.replace('**', '').replace('__', '').replace('`', '').replace('₹', 'INR ')
+        return txt.encode('latin-1', 'replace').decode('latin-1')
 
+    # Section 1: Customer & Order Telemetry
     pdf.set_font("Arial", "B", 11)
     pdf.cell(0, 8, safe_text("1. Customer & Order Telemetry"), 0, 1)
     pdf.set_font("Arial", "", 10)
@@ -38,22 +41,27 @@ def generate_support_pdf(order_id, customer_name, customer_email, query_text, re
     pdf.cell(0, 6, safe_text(f"Customer Email: {customer_email}"), 0, 1)
     pdf.ln(4)
     
+    # Section 2: Support Dispatch Query
     pdf.set_font("Arial", "B", 11)
     pdf.cell(0, 8, safe_text("2. Support Dispatch Query / Issue"), 0, 1)
     pdf.set_font("Arial", "", 10)
     pdf.multi_cell(0, 6, safe_text(query_text))
     pdf.ln(4)
     
+    # Section 3: Autonomous Swarm Resolution
     pdf.set_font("Arial", "B", 11)
     pdf.cell(0, 8, safe_text("3. Autonomous Swarm Resolution & Policy Attribution"), 0, 1)
     pdf.set_font("Arial", "", 10)
     
     clean_res = re.sub(r'#+\s*', '', resolution_text)
-    clean_res = clean_res.replace('**', '')
-    clean_res = clean_res.replace('`', '')
-    pdf.multi_cell(0, 6, safe_text(clean_res))
+    for line in clean_res.split('\n'):
+        pdf.multi_cell(0, 6, safe_text(line))
     
-    return pdf.output(dest='S')
+    # Robust byte output handling for Python 3 FPDF
+    pdf_output = pdf.output(dest='S')
+    if isinstance(pdf_output, str):
+        return pdf_output.encode('latin1', errors='ignore')
+    return bytes(pdf_output)
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT_DIR not in sys.path:
